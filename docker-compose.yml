@@ -1,7 +1,13 @@
-version: '2'
+version: '3.4'
 
 volumes:
-  data-volume:
+    data-volume:
+    elasticsearch-volume:
+
+networks:
+    my-proxy-net:
+        external:
+            name: tagwalk
 
 services:
     db:
@@ -17,6 +23,8 @@ services:
             - ./sql:/docker-entrypoint-initdb.d/
         ports:
             - 3306:3306
+        networks:
+            - my-proxy-net
     php:
         build:
             context: php7-fpm
@@ -31,16 +39,24 @@ services:
             - ./logs/symfony/www:/var/www/tagwalk-www/app/logs
             - ./php7-fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
             - ../uploads:/var/www/tagwalk-admin/uploads
+        ports:
+            - 9000
+        networks:
+            - my-proxy-net
     nginx:
         build: nginx
         ports:
             - 80:80
             - 443:443
-        volumes_from:
-            - php
         volumes:
+            - ${BACK_APP_PATH}:/var/www/tagwalk-admin:rw
+            - ${FRONT_APP_PATH}:/var/www/tagwalk-www
+            - ../uploads:/var/www/tagwalk-admin/uploads
             - ./logs/nginx/:/var/log/nginx
             - ./nginx/certs:/etc/nginx/ssl
+        depends_on: [ php ]
+        networks:
+            - my-proxy-net
     elk:
         build: elk
         ports:
@@ -51,9 +67,13 @@ services:
             - ./elk/logstash/patterns:/opt/logstash/patterns
             - ./elk/logstash/driver:/opt/logstash/driver
             - ./elk/logstash/conf:/etc/logstash/conf.d
-        volumes_from:
-            - php
-            - nginx
+            - elasticsearch-volume:/var/data/elasticsearch
+            - ./logs/nginx/:/var/log/nginx
+            - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs
+            - ./logs/symfony/www:/var/www/tagwalk-www/app/logs
+        depends_on: [ db ]
+        networks:
+            - my-proxy-net
     ftpd:
         build: proftpd
         ports:
@@ -62,3 +82,5 @@ services:
         volumes:
           - ../uploads:/home/ftp/uploads
         privileged: true
+        networks:
+            - my-proxy-net
