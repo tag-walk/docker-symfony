@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     ftp \
     geoip-database \
     git \
+    gnupg2 \
     libav-tools \
     libicu-dev \
     libssl-dev \
