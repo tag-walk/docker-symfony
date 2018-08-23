@@ -33,7 +33,7 @@ services:
         environment:
             COMPOSER_ALLOW_SUPERUSER: 1
         volumes:
-            - ${BACK_APP_PATH}:/var/www/tagwalk-admin:rw
+            - ${BACK_APP_PATH}:/var/www/tagwalk-admin
             - ${FRONT_APP_PATH}:/var/www/tagwalk-www
             - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs
             - ./logs/symfony/www:/var/www/tagwalk-www/app/logs
