@@ -86,6 +86,7 @@ Just run `docker-compose up -d`, then:
 * Back (admin) app: [admin.tag-walk.local](https://admin.tag-walk.local)  
 * Back (admin) dev mode: [admin.tag-walk.local/app_dev.php](http://admin.tag-walk.local/app_dev.php)  
 * Elasticsearch index: [tag-walk.local:9200](http://tag-walk.local:9200)
+* RabbitMQ administration: [tag-walk.local:15672](http://tag-walk.local:15672)
 * Logs (Kibana): [tag-walk.local:5601](http://tag-walk.local:5601)
 * Logs (files location): logs/nginx and logs/symfony
 
@@ -113,13 +114,14 @@ This results in the following running containers:
 
 ```bash
 $ docker-compose ps
-        Name                       Command               State                                Ports
----------------------------------------------------------------------------------------------------------------------------------
-dockersymfony_db_1      docker-entrypoint.sh --max ...   Up      3306/tcp
-dockersymfony_elk_1     /usr/bin/supervisord -n -c ...   Up      0.0.0.0:81->80/tcp
-dockersymfony_ftpd_1    proftpd --nodaemon               Up      0.0.0.0:32769->1220/tcp, 0.0.0.0:32768->1281/tcp, 20/tcp, 21/tcp
-dockersymfony_nginx_1   nginx                            Up      0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
-dockersymfony_php_1     docker-php-entrypoint php-fpm    Up      9000/tcp
+        Name                       Command                   State                                Ports
+--------------------------------------------------------------------------------------------------------------------------------------
+dockersymfony_db_1          docker-entrypoint.sh --max ...   Up      3306/tcp
+dockersymfony_elk_1         /usr/bin/supervisord -n -c ...   Up      0.0.0.0:81->80/tcp
+dockersymfony_ftpd_1        proftpd --nodaemon               Up      0.0.0.0:32769->1220/tcp, 0.0.0.0:32768->1281/tcp, 20/tcp, 21/tcp
+dockersymfony_nginx_1       nginx                            Up      0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
+dockersymfony_php_1         docker-php-entrypoint php-fpm    Up      9000/tcp
+docker-symfony_rabbitmq_1   docker-entrypoint.sh rabbi ...   Up      15671/tcp, 0.0.0.0:15672->15672/tcp, 25672/tcp, 4369/tcp, 5671/tcp, 0.0.0.0:5672->5672/tcp
 ```
 
 ## Useful commands
