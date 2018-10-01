@@ -39,7 +39,7 @@ RUN export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" 
 RUN pecl install imagick-3.4.3 \
     && pecl install xdebug
 RUN docker-php-ext-enable imagick xdebug
-RUN docker-php-ext-install pdo pdo_mysql ftp intl mbstring exif
+RUN docker-php-ext-install pdo pdo_mysql ftp intl mbstring exif bcmath
 
 # Install mozjpeg
 WORKDIR /source

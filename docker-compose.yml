@@ -84,3 +84,14 @@ services:
         privileged: true
         networks:
             - my-proxy-net
+
+    rabbitmq:
+        image: rabbitmq:3.6-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        environment:
+            RABBITMQ_DEFAULT_USER: tagwalk
+            RABBITMQ_DEFAULT_PASS: tagwalk
+        networks:
+            - my-proxy-net
