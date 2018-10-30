@@ -75,4 +75,6 @@ RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-x
 
 RUN echo 'alias sf="php app/console"' >> ~/.bashrc
 
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+
 WORKDIR /var/www
