@@ -2,17 +2,16 @@ version: '3.4'
 
 volumes:
     data-volume:
-    elasticsearch-volume:
 
 networks:
-    my-proxy-net:
+    tagwalk-local:
         external:
             name: tagwalk
 
 services:
     db:
-        image: mariadb:10.0
-        command: --max_allowed_packet=64M
+        image: mariadb:10.2.10
+        command: --max_allowed_packet=128M
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
             MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -24,7 +23,7 @@ services:
         ports:
             - 3306:3306
         networks:
-            - my-proxy-net
+            - tagwalk-local
     php:
         build:
             context: php7-fpm
@@ -36,63 +35,36 @@ services:
         volumes:
             - ${BACK_APP_PATH}:/var/www/tagwalk-admin
             - ${FRONT_APP_PATH}:/var/www/tagwalk-www
-            - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs
-            - ./logs/symfony/www:/var/www/tagwalk-www/app/logs
-            - ./php7-fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
-            - ../uploads:/var/www/tagwalk-admin/uploads
+            - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs:delegated
+            - ./logs/symfony/www:/var/www/tagwalk-www/app/logs:delegated
+            - ./php7-fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini:cached
+            - ../uploads:/var/www/tagwalk-admin/uploads:cached
         ports:
             - 9000
         networks:
-            - my-proxy-net
+            - tagwalk-local
     nginx:
         build: nginx
         ports:
             - 80:80
             - 443:443
         volumes:
-            - ${BACK_APP_PATH}:/var/www/tagwalk-admin:rw
-            - ${FRONT_APP_PATH}:/var/www/tagwalk-www
-            - ../uploads:/var/www/tagwalk-admin/uploads
-            - ./logs/nginx/:/var/log/nginx
+            - ${BACK_APP_PATH}/web:/var/www/tagwalk-admin/web:cached
+            - ${FRONT_APP_PATH}/web:/var/www/tagwalk-www/web:cached
+            - ../uploads:/var/www/tagwalk-admin/uploads:cached
+            - ./logs/nginx/:/var/log/nginx:delegated
             - ./nginx/certs:/etc/nginx/ssl
         depends_on: [ php ]
         networks:
-            - my-proxy-net
-    elk:
-        build: elk
-        ports:
-            - 5601:5601
-            - 9200:9200
-            - 5044:5044
-        volumes:
-            - ./elk/logstash/patterns:/opt/logstash/patterns
-            - ./elk/logstash/driver:/opt/logstash/driver
-            - ./elk/logstash/conf:/etc/logstash/conf.d
-            - elasticsearch-volume:/var/data/elasticsearch
-            - ./logs/nginx/:/var/log/nginx
-            - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs
-            - ./logs/symfony/www:/var/www/tagwalk-www/app/logs
-        depends_on: [ db ]
-        networks:
-            - my-proxy-net
+            - tagwalk-local
     ftpd:
         build: proftpd
         ports:
-            - 20:20
-            - 21:21
+            - 20
+            - 21
+            - 22
         volumes:
           - ../uploads:/home/ftp/uploads
         privileged: true
         networks:
-            - my-proxy-net
-
-    rabbitmq:
-        image: rabbitmq:3.6-management
-        ports:
-          - 5672:5672
-          - 15672:15672
-        environment:
-            RABBITMQ_DEFAULT_USER: tagwalk
-            RABBITMQ_DEFAULT_PASS: tagwalk
-        networks:
-            - my-proxy-net
+            - tagwalk-local
