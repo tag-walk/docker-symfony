@@ -2,10 +2,6 @@ version: '3.4'
 
 volumes:
     data-volume:
-    admin-vendor:
-    admin-cache:
-    www-vendor:
-    www-cache:
 
 networks:
     tagwalk-local:
@@ -14,7 +10,7 @@ networks:
 
 services:
     db:
-        image: mariadb:10.0
+        image: mariadb:10.2.10
         command: --max_allowed_packet=128M
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -38,11 +34,7 @@ services:
             COMPOSER_MEMORY_LIMIT: -1
         volumes:
             - ${BACK_APP_PATH}:/var/www/tagwalk-admin
-            - admin-vendor:/var/www/tagwalk-admin/vendor
-            - admin-cache:/var/www/tagwalk-admin/app/cache
             - ${FRONT_APP_PATH}:/var/www/tagwalk-www
-            - www-vendor:/var/www/tagwalk-www/vendor
-            - www-cache:/var/www/tagwalk-www/app/cache
             - ./logs/symfony/admin:/var/www/tagwalk-admin/app/logs:delegated
             - ./logs/symfony/www:/var/www/tagwalk-www/app/logs:delegated
             - ./php7-fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini:cached
@@ -61,15 +53,16 @@ services:
             - ${FRONT_APP_PATH}/web:/var/www/tagwalk-www/web:cached
             - ../uploads:/var/www/tagwalk-admin/uploads:cached
             - ./logs/nginx/:/var/log/nginx:delegated
-            - ./nginx/certs:/etc/nginx/ssl:cached
+            - ./nginx/certs:/etc/nginx/ssl
         depends_on: [ php ]
         networks:
             - tagwalk-local
     ftpd:
         build: proftpd
         ports:
-            - 20:20
-            - 21:21
+            - 20
+            - 21
+            - 22
         volumes:
           - ../uploads:/home/ftp/uploads
         privileged: true
